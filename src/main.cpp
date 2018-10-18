@@ -13,6 +13,7 @@ int main(int argc, char **argv){
     ros::NodeHandle m_nodeHandle;
 
     VideoFrameRef mDepthFrRef;
+    VideoFrameRef mColorFrRef;
     cv::Mat cvDepthImg;
 
     // 初始化openni接口
@@ -27,23 +28,51 @@ int main(int argc, char **argv){
     m_device.open(ANY_DEVICE);
 
     // get depth data
-    VideoStream mDepthStream;
-    mDepthStream.create( m_device, SENSOR_DEPTH );
+    VideoStream mDepthStream ;
+    VideoStream mColorStream;
 
+    mDepthStream.create( m_device, SENSOR_DEPTH );
+    mColorStream.create( m_device, SENSOR_COLOR );
+/*
     VideoMode mDepthMode;
     mDepthMode.setResolution( 640, 480 );
     mDepthMode.setFps( 30 );
     mDepthMode.setPixelFormat( PIXEL_FORMAT_DEPTH_1_MM );
     mDepthStream.setVideoMode(mDepthMode);
+*/
 
+    VideoMode mColorMode;
+    mColorMode.setResolution( 320, 240 );
+    mColorMode.setFps( 30 );
+    mColorMode.setPixelFormat( PIXEL_FORMAT_RGB888 );
+    mColorStream.setVideoMode(mColorMode);
+
+
+    m_device.setImageRegistrationMode( IMAGE_REGISTRATION_DEPTH_TO_COLOR );
+    mDepthStream.start();
+    mColorStream.start();
     // read depth image
-    mDepthStream.readFrame(&mDepthFrRef);
+  //  mDepthStream.readFrame(&mDepthFrRef);
 
-    cv::Mat cvRawImg16U( mDepthFrRef.getHeight(), mDepthFrRef.getWidth(), CV_16UC1, (void*)mDepthFrRef.getData() );
-    cvRawImg16U.convertTo( cvDepthImg, CV_8U, 255.0/(mDepthStream.getMaxPixelValue()));
+    // set the depth <==> color
 
-    cv::imshow("depth_img", cvDepthImg);
 
+    while(true){
+        mColorStream.readFrame(&mColorFrRef);
+
+       // cv::Mat cvRawImg16U( mDepthFrRef.getHeight(), mDepthFrRef.getWidth(), CV_16UC1, (void*)mDepthFrRef.getData() );
+      //  cvRawImg16U.convertTo( cvDepthImg, CV_8U, 255.0/(mDepthStream.getMaxPixelValue()));
+
+        cv::Mat cvRgbImg(mColorFrRef.getHeight(), mColorFrRef.getWidth(), CV_8UC3, (void*)mColorFrRef.getData() );
+        cv::Mat cImageBGR;
+        cv::cvtColor(cvRgbImg, cImageBGR, CV_RGB2BGR);
+
+     //   cv::imshow("depth_img", cvDepthImg);
+        cv::imshow("rgb_img", cImageBGR);
+
+        if( cv::waitKey(1) == 27)
+            break;
+    }
     return 0;
 
 }

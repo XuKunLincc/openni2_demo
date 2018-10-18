@@ -101,7 +101,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
   LIBRARIES openni2_demo
   CATKIN_DEPENDS roscpp
   DEPENDS system_lib
@@ -133,6 +132,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(demo src/main.cpp)
 add_executable(nite_demo src/nite_demo.cpp)
+#add_executable(handshake src/handshake.cpp)
+#add_executable(tf_transform src/tf_transform.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -177,10 +178,11 @@ endif()
 
 # NITE2
 include_directories(
-    /home/eima/Work/3rd/NiTE-Linux-x64-2.2/Include
+    /home/fshs/work/3rd/NiTE-Linux-x64-2.2/Include
     /usr/include/openni2/
 )
-FIND_LIBRARY(NITE2_LIB NiTE2 /home/eima/Work/3rd/NiTE-Linux-x64-2.2/Redist/)
+FIND_LIBRARY(NITE2_LIB NiTE2 /home/fshs/work/3rd/NiTE-Linux-x64-2.2/Redist)
+MESSAGE(STATUS $ENV{NITE2_REDIST64})
 #############
 ## Install ##
 #############
@@ -193,7 +195,7 @@ target_link_libraries(demo
   libOpenNI2.so
  )
 
-
+message(STATUS "test" ${CATKIN_PACKAGE_LIB_DESTINATION})
 target_link_libraries(nite_demo
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
@@ -211,11 +213,11 @@ target_link_libraries(nite_demo
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS nite_demo
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+ LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
