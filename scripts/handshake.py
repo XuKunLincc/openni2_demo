@@ -13,7 +13,7 @@ import copy
 
 home = "home"
 handshake_pre = False
-datanum = 5
+datanum = 2
 error = 0.05
 handshaking = "Handshaked"
 ready = "Ready"

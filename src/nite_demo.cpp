@@ -138,17 +138,15 @@ int main(int argc, char **argv){
                 it->second.z[data_index] = position.z;
 
                 data_index ++;
-                if(data_index >= 4){
+                if(data_index >= 3){
                     getData( it->second);      // will set index = 0
                     ROS_INFO("%s %f | %f | %f",  "right_hand_pos: ", position.x, position.y, position.z);
-                    cout << "右手坐标： " << position.x << "/" << position.y << "/" << position.z << "|||||||||||||||" <<   it->second.x[0] << endl;;
+                    //cout << "右手坐标： " << position.x << "/" << position.y << "/" << position.z << "|||||||||||||||" <<   it->second.x[0] << endl;;
                     geometry_msgs::Pose pose;
-                    //pose.position.x =  (- position.x / 1000 ) - 0.1;  pose.position.y = - position.y  / 1000; pose.position.z = position.z  / 1000;
                     pose.position.x =  (- it->second.target_x / 1000 ) - 0.1;  pose.position.y = - it->second.target_y  / 1000; pose.position.z = it->second.target_z  / 1000;
                     pose.orientation.x = quat.x; pose.orientation.y = quat.y; pose.orientation.z = quat.z; pose.orientation.w = quat.w;
                     poses.push_back(pose);
                 }
-                //posePub.publish(pose);
             }
         }   // for
 
@@ -188,7 +186,7 @@ int main(int argc, char **argv){
             break;
 #endif
 
-        ros::spinOnce();
+        //ros::spinOnce();
         loop_rate.sleep();
 
     } // while(true)

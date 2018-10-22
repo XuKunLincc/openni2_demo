@@ -17,20 +17,31 @@ get_pose = False
 def callback(data):
     global right_hand_pose
     global get_pose
-    right_hand_pose.pose = data.poses[0]
+  
+    index = 0
+    max_x = -99.0
+    i = 0
+    for pose in data.poses:
+        if pose.position.x > max_x:
+            index = i
+            max_x = pose.position.x
+        i += 1
+
+    right_hand_pose.pose = data.poses[index]
+
     get_pose = True
 
 if __name__ == '__main__':
     rospy.init_node('transform_to_base')
 
     rospy.Subscriber("right_hand_pose", PoseArray, callback)
-    pub = rospy.Publisher("right_hand_pose_base", Pose, queue_size=20)
+    pub = rospy.Publisher("right_hand_pose_base", Pose, queue_size=30)
     listener = tf.TransformListener()
     br = tf.TransformBroadcaster()
 
     global get_pose
 
-    rate = rospy.Rate(20.0)
+    rate = rospy.Rate(60.0)
     while not rospy.is_shutdown():
         if get_pose:
             get_pose = False
