@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(openni2_demo)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-D_LINUX_)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -176,13 +176,19 @@ else()
 endif()
 
 
+#HSC3
+FIND_LIBRARY(CommApi_LIB  CommApi  lib)
+FIND_LIBRARY(Hsc3Api_LIB   Hsc3Api  lib)
+FIND_LIBRARY(LogApi_LIB LogApi lib)
+
+
 # NITE2
 include_directories(
-    /home/fshs/work/3rd/NiTE-Linux-x64-2.2/Include
+    /home/eima/Work/3rd/NiTE-Linux-x64-2.2/Include
     /usr/include/openni2/
 )
-FIND_LIBRARY(NITE2_LIB NiTE2 /home/fshs/work/3rd/NiTE-Linux-x64-2.2/Redist)
-MESSAGE(STATUS $ENV{NITE2_REDIST64})
+FIND_LIBRARY(NITE2_LIB NiTE2 /home/eima/Work/3rd/NiTE-Linux-x64-2.2/Redist)
+
 #############
 ## Install ##
 #############
@@ -201,6 +207,13 @@ target_link_libraries(nite_demo
   ${OpenCV_LIBS}
   libOpenNI2.so
   ${NITE2_LIB}
+  ${CommApi_LIB}
+  ${Hsc3Api_LIB}
+  ${LogApi_LIB}
+  libboost_atomic.so
+  libboost_chrono.so
+  libboost_system.so
+  libboost_thread.so
  )
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html

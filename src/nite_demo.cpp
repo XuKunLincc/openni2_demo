@@ -7,6 +7,14 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
 
+#include "CommApi.h"
+#include "ProxyMotion.h"
+#include "ProxySys.h"
+#include "ProxyVar.h"
+#include "ErrDef.h"
+
+
+
 #define VISI_DEBUG 1
 
 using namespace std;
@@ -23,6 +31,11 @@ int data_index = 0;
 double target_x = 0;
 double target_y = 0;
 double target_z = 0;
+
+ProxyMotion *mProxyMotion;
+ProxySys *mProxySys;
+CommApi *mCommApi;
+ProxyVar *mProxyVar;
 
 typedef struct {
     double x[N];
@@ -41,6 +54,56 @@ int rosInit(int argc, char **argv){
     ros::init(argc, argv, "right_handle");
     mNodeHandle = new ros::NodeHandle();
     posePub = mNodeHandle->advertise<geometry_msgs::PoseArray>("right_hand_pose", 1000);
+}
+
+int robotInit(){
+    string ip;
+    int port;
+    mNodeHandle->param<std::string>("hsr_robot_ip", ip, "10.10.56.214");
+    mNodeHandle->param<int>("hsr_robot_ip", port, 23234);
+
+    mCommApi = NULL;
+    mCommApi = new CommApi("demo_log");
+    if(mCommApi == NULL){
+        cout << "CommApi init error" << endl;
+        return -1;
+    }
+
+    HMCErrCode errCode;
+    errCode = mCommApi->connect(ip, port);
+    if(KM_ERR_OK != errCode){
+        ROS_ERROR( "连接控制器失败" );
+        return -1;
+    }
+
+    ROS_INFO("connected robot");
+    mProxyMotion = new ProxyMotion(mCommApi);			// 初始化运动模块
+    mProxySys = new ProxySys(mCommApi);
+    mProxyVar = new ProxyVar(mCommApi);
+}
+
+bool haveBody = false;
+
+int check(hand_data &data){
+    if( data.target_x < 1 && data.target_z > 1 && data.target_z < 2){
+        if( !haveBody ){
+            ROS_INFO("body come");
+            haveBody = true;
+        }
+    }else{
+        if(haveBody)
+            ROS_INFO("body out");
+            haveBody = false;
+    }
+}
+
+void setReg(bool haveBody){
+
+    if(haveBody){
+        mProxyVar->setR(1,1);
+    }else{
+        mProxyVar->setR(1,0);
+    }
 }
 
 void getData(hand_data &data){
@@ -76,12 +139,19 @@ void getData(hand_data &data){
     data.target_y =  sum_y / (N - 2);
     data.target_z =  sum_z / (N - 2);
 
+    check(data);
+
 }
 
 int main(int argc, char **argv){
 
     // init ros
     rosInit(argc, argv);
+
+    if(robotInit() != 0){
+        ROS_ERROR("robot init failed");
+        return -1;
+    }
 
     // init NiTE
     NiTE::initialize();
